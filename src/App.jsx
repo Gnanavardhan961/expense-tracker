@@ -10,20 +10,13 @@ import {
 } from "recharts";
 
 function App() {
-  // Pre-filled transactions to match Cypress tests
   const [transactions, setTransactions] = useState(() => {
     const saved = localStorage.getItem("transactions");
-    return saved
-      ? JSON.parse(saved)
-      : [
-          { id: 1, title: "Food", amount: 150, type: "expense", category: "food", date: "2025-10-01" },
-          { id: 2, title: "Travel", amount: 300, type: "expense", category: "travel", date: "2025-10-02" },
-          { id: 3, title: "Entertainment", amount: 200, type: "expense", category: "entertainment", date: "2025-10-03" },
-          { id: 4, title: "Salary", amount: 2000, type: "income", category: "salary", date: "2025-10-03" },
-        ];
+    return saved ? JSON.parse(saved) : [];
   });
 
   const [balance, setBalance] = useState(0);
+  const [expenseTotal, setExpenseTotal] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({
     title: "",
@@ -33,14 +26,16 @@ function App() {
     date: new Date().toISOString().split("T")[0],
   });
 
-  // Persist transactions & update balance
   useEffect(() => {
     localStorage.setItem("transactions", JSON.stringify(transactions));
-    const total = transactions.reduce(
-      (acc, t) => (t.type === "income" ? acc + t.amount : acc - t.amount),
-      0
-    );
-    setBalance(total);
+    const income = transactions
+      .filter((t) => t.type === "income")
+      .reduce((acc, t) => acc + t.amount, 0);
+    const expense = transactions
+      .filter((t) => t.type === "expense")
+      .reduce((acc, t) => acc + t.amount, 0);
+    setBalance(income - expense);
+    setExpenseTotal(expense);
   }, [transactions]);
 
   const openModal = (type) => {
@@ -53,6 +48,7 @@ function App() {
     });
     setIsModalOpen(true);
   };
+
   const closeModal = () => setIsModalOpen(false);
 
   const handleChange = (e) => {
@@ -77,23 +73,13 @@ function App() {
   const deleteTransaction = (id) =>
     setTransactions(transactions.filter((tx) => tx.id !== id));
 
-  // Chart data
   const chartData = [
-    {
-      name: "Income",
-      value: transactions
-        .filter((tx) => tx.type === "income")
-        .reduce((acc, tx) => acc + tx.amount, 0),
-    },
-    {
-      name: "Expense",
-      value: transactions
-        .filter((tx) => tx.type === "expense")
-        .reduce((acc, tx) => acc + tx.amount, 0),
-    },
+    { name: "Food", value: transactions.filter((t) => t.category === "food").reduce((a, b) => a + b.amount, 0) },
+    { name: "Entertainment", value: transactions.filter((t) => t.category === "entertainment").reduce((a, b) => a + b.amount, 0) },
+    { name: "Travel", value: transactions.filter((t) => t.category === "travel").reduce((a, b) => a + b.amount, 0) },
   ];
 
-  const COLORS = ["#0ea5e9", "#ef4444"];
+  const COLORS = ["#a855f7", "#f97316", "#facc15"];
 
   return (
     <div className="container">
@@ -101,75 +87,59 @@ function App() {
 
       {/* Top Row */}
       <div className="top-row">
-        {/* Wallet Card */}
-        <div className="wallet-card">
-          <h3>Wallet Balance</h3>
-          <div className="wallet-amount">₹{balance.toLocaleString()}</div>
-          <div className="wallet-actions">
-            <button className="btn primary" onClick={() => openModal("income")}>
-              + Add Income
-            </button>
-            <button className="btn primary" onClick={() => openModal("expense")}>
-              + Add Expense
-            </button>
-          </div>
+        <div className="card">
+          <h3>Wallet Balance: <span className="green">₹{balance}</span></h3>
+          <button className="btn green" onClick={() => openModal("income")}>+ Add Income</button>
         </div>
-
-        {/* Chart Card */}
-        <div className="charts-card">
-          <h3>Income vs Expense</h3>
-          <div className="chart-wrapper">
-            {chartData[0].value === 0 && chartData[1].value === 0 ? (
-              <div className="no-data">No data available</div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={90}
-                    label
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+        <div className="card">
+          <h3>Expenses: <span className="orange">₹{expenseTotal}</span></h3>
+          <button className="btn red" onClick={() => openModal("expense")}>+ Add Expense</button>
+        </div>
+        <div className="card chart-card">
+          <ResponsiveContainer width="100%" height={120}>
+            <PieChart>
+              <Pie
+                data={chartData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                outerRadius={50}
+              >
+                {chartData.map((entry, index) => (
+                  <Cell key={index} fill={COLORS[index]} />
+                ))}
+              </Pie>
+              <Legend />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
-      {/* Transactions */}
-      <div className="transactions">
-        <h3>Expenses</h3>
-        <ul className="tx-list">
-          {transactions.map((tx) => (
-            <li key={tx.id} className="tx-item">
-              <div className="tx-left">
-                <span className="tx-title">{tx.title}</span>
-                <span className="tx-meta">{tx.date}</span>
-              </div>
-              <div className="tx-right">
-                <span
-                  className="tx-amount"
-                  style={{ color: tx.type === "income" ? "green" : "red" }}
-                >
-                  {tx.type === "income" ? "+" : "-"}₹{tx.amount}
-                </span>
-                <button className="icon-btn" onClick={() => deleteTransaction(tx.id)}>
-                  ❌
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+      {/* Bottom Section */}
+      <div className="bottom-row">
+        <div className="transactions-box">
+          <h3><i>Recent Transactions</i></h3>
+          {transactions.length === 0 ? (
+            <p>No transactions!</p>
+          ) : (
+            <ul>
+              {transactions.map((tx) => (
+                <li key={tx.id}>
+                  {tx.title} - {tx.type === "income" ? "+" : "-"}₹{tx.amount}
+                  <button onClick={() => deleteTransaction(tx.id)}>❌</button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="top-expenses">
+          <h3><i>Top Expenses</i></h3>
+          <p>Food - ₹{chartData[0].value}</p>
+          <p>Entertainment - ₹{chartData[1].value}</p>
+          <p>Travel - ₹{chartData[2].value}</p>
+        </div>
       </div>
 
       {/* Modal */}
@@ -177,57 +147,19 @@ function App() {
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>Add {form.type === "income" ? "Income" : "Expense"}</h3>
-
-            <div className="form-group">
-              <label>Title</label>
-              <input
-                type="text"
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                placeholder="Enter title"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Amount</label>
-              <input
-                type="number"
-                name="amount"
-                value={form.amount}
-                onChange={handleChange}
-                placeholder={form.type === "income" ? "Income Amount" : "Expense Amount"}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Category</label>
-              <select name="category" value={form.category} onChange={handleChange}>
-                <option value="food">Food</option>
-                <option value="travel">Travel</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="salary">Salary</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label>Date</label>
-              <input
-                type="date"
-                name="date"
-                value={form.date}
-                onChange={handleChange}
-              />
-            </div>
-
-            <div className="modal-actions">
-              <button className="btn" onClick={closeModal}>
-                Cancel
-              </button>
-              <button type="submit" className="btn primary" onClick={addTransaction}>
-                Add Balance
-              </button>
+            <input type="text" name="title" placeholder="Title" value={form.title} onChange={handleChange} />
+            <input type="number" name="amount" placeholder="Amount" value={form.amount} onChange={handleChange} />
+            <select name="category" value={form.category} onChange={handleChange}>
+              <option value="food">Food</option>
+              <option value="entertainment">Entertainment</option>
+              <option value="travel">Travel</option>
+              <option value="salary">Salary</option>
+              <option value="other">Other</option>
+            </select>
+            <input type="date" name="date" value={form.date} onChange={handleChange} />
+            <div>
+              <button className="btn" onClick={closeModal}>Cancel</button>
+              <button className="btn primary" onClick={addTransaction}>Add</button>
             </div>
           </div>
         </div>
