@@ -1,6 +1,3 @@
-/* App.css */
-
-/* --- Variables --- */
 :root {
   --bg-dark: #333333;
   --bg-light: #555555;
@@ -37,7 +34,7 @@ body {
   color: var(--text-light);
 }
 
-/* --- Layout Grids --- */
+/* --- Layout Grids (Desktop View) --- */
 .top-row-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -47,7 +44,7 @@ body {
 
 .bottom-row-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr; /* Transactions wider than Top Expenses */
+  grid-template-columns: 2fr 1fr;
   gap: 20px;
 }
 
@@ -63,8 +60,8 @@ body {
   align-items: center;
 }
 
-/* Specific Card Styles */
-.balance-card, .expenses-card {
+.balance-card,
+.expenses-card {
   text-align: center;
 }
 
@@ -92,10 +89,9 @@ body {
 }
 
 .no-chart-data {
-    color: var(--text-light);
-    font-size: 14px;
+  color: var(--text-light);
+  font-size: 14px;
 }
-
 
 /* --- Buttons --- */
 .btn {
@@ -129,9 +125,9 @@ body {
 }
 
 .no-transactions-text {
-    text-align: center;
-    color: #aaaaaa;
-    margin-top: 20px;
+  text-align: center;
+  color: #aaaaaa;
+  margin-top: 20px;
 }
 
 .transaction-list {
@@ -152,40 +148,41 @@ body {
 }
 
 .tx-details {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .tx-title {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .tx-date {
-    font-size: 12px;
-    color: #cccccc;
+  font-size: 12px;
+  color: #cccccc;
 }
 
 .tx-controls {
-    display: flex;
-    align-items: center;
-    gap: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .income-text {
-    color: var(--color-green);
-    font-weight: bold;
+  color: var(--color-green);
+  font-weight: bold;
 }
 
 .expense-text {
-    color: var(--color-red);
-    font-weight: bold;
+  color: var(--color-red);
+  font-weight: bold;
 }
 
-.edit-btn, .delete-btn {
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 14px;
+.edit-btn,
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
 }
 
 /* --- Top Expenses Box --- */
@@ -194,32 +191,31 @@ body {
 }
 
 .top-expenses-list {
-    list-style: none;
-    padding: 0;
-    width: 100%;
+  list-style: none;
+  padding: 0;
+  width: 100%;
 }
 
 .top-expenses-list li {
-    margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 
 .category-label {
-    font-size: 14px;
-    margin-bottom: 5px;
+  font-size: 14px;
+  margin-bottom: 5px;
 }
 
 .progress-bar-container {
-    background-color: #555555;
-    height: 10px;
-    border-radius: 5px;
-    overflow: hidden;
+  background-color: #555555;
+  height: 10px;
+  border-radius: 5px;
+  overflow: hidden;
 }
 
 .progress-bar {
-    height: 100%;
-    transition: width 0.5s ease-in-out;
+  height: 100%;
+  transition: width 0.5s ease-in-out;
 }
-
 
 /* --- Modals --- */
 .modal-overlay {
@@ -262,13 +258,11 @@ body {
   font-size: 16px;
 }
 
-/* Income Modal Specifics */
 .income-modal .modal-form-row {
   display: flex;
   flex-direction: column;
 }
 
-/* Expense Modal Grid */
 .expense-modal .modal-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -288,18 +282,52 @@ body {
 }
 
 .income-modal .primary {
-  background-color: var(--color-orange); /* Match "Add Balance" button color */
+  background-color: var(--color-orange);
   color: var(--bg-dark);
   font-weight: bold;
 }
 
 .expense-modal .expense-primary {
-    background-color: var(--color-orange); /* Match "Add Expense" button color */
-    color: var(--bg-dark);
-    font-weight: bold;
+  background-color: var(--color-orange);
+  color: var(--bg-dark);
+  font-weight: bold;
 }
 
 .modal-cancel-btn {
   background-color: #aaaaaa;
   color: var(--bg-dark);
+}
+
+/* --- Responsive --- */
+@media (max-width: 600px) {
+  .app-container {
+    padding: 10px;
+    margin: 20px auto;
+  }
+
+  .top-row-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .bottom-row-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .modal-content {
+    width: 90%;
+    max-width: 350px;
+    padding: 20px;
+  }
+
+  .expense-modal .modal-form-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
 }

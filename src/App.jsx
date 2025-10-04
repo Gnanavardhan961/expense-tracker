@@ -51,9 +51,12 @@ function App() {
   const openExpenseModal = () => setIsExpenseModalOpen(true);
   const closeExpenseModal = () => setIsExpenseModalOpen(false);
 
+  // FIX: Map the input name 'price' used by tests to your state name 'amount'
   const handleExpenseChange = (e) => {
     const { name, value } = e.target;
-    setExpenseForm({ ...expenseForm, [name]: value });
+    // If the input name is 'price', update the 'amount' state property
+    const stateName = name === 'price' ? 'amount' : name; 
+    setExpenseForm({ ...expenseForm, [stateName]: value });
   };
 
   // Function to add a new income transaction
@@ -74,6 +77,7 @@ function App() {
 
   // Function to add a new expense transaction
   const addExpense = () => {
+    // Note: The expenseForm.amount is being updated correctly by handleExpenseChange
     if (!expenseForm.title || !expenseForm.amount) return;
     const newTx = {
       id: Date.now(),
@@ -220,7 +224,8 @@ function App() {
               />
             </div>
             <div className="modal-actions">
-              <button className="btn modal-add-btn primary" onClick={addIncome}>Add Balance</button>
+              {/* FIX 1: Added type="submit" for test "Adds an income successfully" */}
+              <button className="btn modal-add-btn primary" onClick={addIncome} type="submit">Add Balance</button>
               <button className="btn modal-cancel-btn" onClick={closeIncomeModal}>Cancel</button>
             </div>
           </div>
@@ -243,7 +248,8 @@ function App() {
               />
               <input 
                 type="number" 
-                name="amount" 
+                // FIX 2: Changed name from "amount" to "price" for all expense-related tests
+                name="price" 
                 placeholder="Price" 
                 value={expenseForm.amount} 
                 onChange={handleExpenseChange} 
