@@ -1,86 +1,305 @@
+/* App.css */
+
+/* --- Variables --- */
+:root {
+  --bg-dark: #333333;
+  --bg-light: #555555;
+  --text-light: #ffffff;
+  --color-green: #66cc33;
+  --color-red: #ff4d4f;
+  --color-orange: #ff9800;
+  --card-bg: #444444;
+  --input-bg: #ffffff;
+  --modal-bg: #777777;
+  --modal-header-bg: #888888;
+}
+
+/* --- Global & Typography --- */
 body {
-  background: #2f2f2f;
-  color: white;
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+  margin: 0;
+  padding: 0;
   font-family: Arial, sans-serif;
 }
 
-.container {
+.app-container {
+  max-width: 900px;
+  margin: 40px auto;
   padding: 20px;
+  background-color: var(--bg-dark);
 }
 
-h1 {
+.main-title {
+  text-align: left;
+  margin-bottom: 20px;
+  font-size: 28px;
+  color: var(--text-light);
+}
+
+/* --- Layout Grids --- */
+.top-row-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.bottom-row-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr; /* Transactions wider than Top Expenses */
+  gap: 20px;
+}
+
+/* --- Cards --- */
+.card {
+  background-color: var(--card-bg);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Specific Card Styles */
+.balance-card, .expenses-card {
+  text-align: center;
+}
+
+.card-title {
+  font-size: 18px;
+  margin-bottom: 15px;
+  color: var(--text-light);
+}
+
+.balance-amount {
+  color: var(--color-green);
+  font-size: 30px;
   font-weight: bold;
 }
 
-.top-row {
-  display: flex;
-  gap: 20px;
-}
-
-.card {
-  background: #555;
-  padding: 20px;
-  border-radius: 10px;
-  flex: 1;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+.expense-amount {
+  color: var(--color-red);
+  font-size: 30px;
+  font-weight: bold;
 }
 
 .chart-card {
-  flex: 1;
-}
-
-.green {
-  color: #22c55e;
-}
-
-.orange {
-  color: #fbbf24;
-}
-
-.btn {
-  margin-top: 10px;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.btn.green {
-  background: #22c55e;
-  color: white;
-}
-
-.btn.red {
-  background: #ef4444;
-  color: white;
-}
-
-.bottom-row {
-  display: flex;
-  margin-top: 20px;
-  gap: 20px;
-}
-
-.transactions-box, .top-expenses {
-  background: #444;
-  flex: 1;
-  padding: 15px;
-  border-radius: 8px;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
   justify-content: center;
   align-items: center;
 }
 
+.no-chart-data {
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+
+/* --- Buttons --- */
+.btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s;
+}
+
+.add-income-btn {
+  background-color: var(--color-green);
+  color: var(--text-light);
+}
+
+.add-expense-btn {
+  background-color: var(--color-red);
+  color: var(--text-light);
+}
+
+/* --- Transactions Box --- */
+.transactions-box {
+  grid-column: 1 / 2;
+}
+
+.section-title {
+  font-size: 20px;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.no-transactions-text {
+    text-align: center;
+    color: #aaaaaa;
+    margin-top: 20px;
+}
+
+.transaction-list {
+  list-style: none;
+  padding: 0;
+}
+
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #555555;
+}
+
+.transaction-item:last-child {
+  border-bottom: none;
+}
+
+.tx-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.tx-title {
+    font-weight: bold;
+}
+
+.tx-date {
+    font-size: 12px;
+    color: #cccccc;
+}
+
+.tx-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.income-text {
+    color: var(--color-green);
+    font-weight: bold;
+}
+
+.expense-text {
+    color: var(--color-red);
+    font-weight: bold;
+}
+
+.edit-btn, .delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+/* --- Top Expenses Box --- */
+.top-expenses-box {
+  grid-column: 2 / 3;
+}
+
+.top-expenses-list {
+    list-style: none;
+    padding: 0;
+    width: 100%;
+}
+
+.top-expenses-list li {
+    margin-bottom: 15px;
+}
+
+.category-label {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.progress-bar-container {
+    background-color: #555555;
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    transition: width 0.5s ease-in-out;
+}
+
+
+/* --- Modals --- */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
 .modal-content {
-  background: white;
-  color: black;
-  padding: 20px;
-  border-radius: 10px;
-  width: 300px;
+  background-color: var(--modal-bg);
+  padding: 30px;
+  border-radius: 8px;
+  width: 400px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-header {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--text-light);
+}
+
+.modal-input {
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #888888;
+  border-radius: 4px;
+  background-color: var(--input-bg);
+  color: var(--bg-dark);
+  font-size: 16px;
+}
+
+/* Income Modal Specifics */
+.income-modal .modal-form-row {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Expense Modal Grid */
+.expense-modal .modal-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.modal-add-btn {
+  padding: 10px 20px;
+}
+
+.income-modal .primary {
+  background-color: var(--color-orange); /* Match "Add Balance" button color */
+  color: var(--bg-dark);
+  font-weight: bold;
+}
+
+.expense-modal .expense-primary {
+    background-color: var(--color-orange); /* Match "Add Expense" button color */
+    color: var(--bg-dark);
+    font-weight: bold;
+}
+
+.modal-cancel-btn {
+  background-color: #aaaaaa;
+  color: var(--bg-dark);
 }
