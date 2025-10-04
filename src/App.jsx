@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import {
   PieChart,
@@ -11,23 +11,34 @@ import {
 
 function App() {
   const [balance, setBalance] = useState(5000);
-  const [transactions, setTransactions] = useState([
-    { id: 1, title: "Groceries", amount: 120, type: "expense", date: "2025-10-01" },
-    { id: 2, title: "Salary", amount: 2000, type: "income", date: "2025-10-03" },
-  ]);
+  const [transactions, setTransactions] = useState(() => {
+    const saved = localStorage.getItem("transactions");
+    return saved
+      ? JSON.parse(saved)
+      : [
+          { id: 1, title: "Groceries", amount: 120, type: "expense", date: "2025-10-01" },
+          { id: 2, title: "Salary", amount: 2000, type: "income", date: "2025-10-03" },
+        ];
+  });
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ title: "", amount: "", type: "expense" });
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => {
-    setForm({ title: "", amount: "", type: "expense" });
-    setIsModalOpen(false);
+  // Persist transactions in localStorage
+  useEffect(() => {
+    localStorage.setItem("transactions", JSON.stringify(transactions));
+    const total = transactions.reduce((acc, t) => (t.type === "income" ? acc + t.amount : acc - t.amount), 0);
+    setBalance(total);
+  }, [transactions]);
+
+  const openModal = (type) => {
+    setForm({ title: "", amount: "", type });
+    setIsModalOpen(true);
   };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const closeModal = () => setIsModalOpen(false);
+
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   const addTransaction = () => {
     if (!form.title || !form.amount) return;
@@ -41,38 +52,19 @@ function App() {
     };
 
     setTransactions([newTx, ...transactions]);
-
-    if (form.type === "income") {
-      setBalance(balance + newTx.amount);
-    } else {
-      setBalance(balance - newTx.amount);
-    }
-
     closeModal();
   };
 
-  const deleteTransaction = (id, amount, type) => {
-    setTransactions(transactions.filter((tx) => tx.id !== id));
-    if (type === "income") {
-      setBalance(balance - amount);
-    } else {
-      setBalance(balance + amount);
-    }
-  };
+  const deleteTransaction = (id) => setTransactions(transactions.filter((tx) => tx.id !== id));
 
-  // Prepare chart data
   const chartData = [
     {
       name: "Income",
-      value: transactions
-        .filter((tx) => tx.type === "income")
-        .reduce((acc, tx) => acc + tx.amount, 0),
+      value: transactions.filter((tx) => tx.type === "income").reduce((acc, tx) => acc + tx.amount, 0),
     },
     {
       name: "Expense",
-      value: transactions
-        .filter((tx) => tx.type === "expense")
-        .reduce((acc, tx) => acc + tx.amount, 0),
+      value: transactions.filter((tx) => tx.type === "expense").reduce((acc, tx) => acc + tx.amount, 0),
     },
   ];
 
@@ -89,8 +81,11 @@ function App() {
           <h3>Wallet Balance</h3>
           <div className="wallet-amount">₹{balance.toLocaleString()}</div>
           <div className="wallet-actions">
-            <button className="btn primary" onClick={openModal}>
-              + Add Transaction
+            <button className="btn primary" onClick={() => openModal("income")}>
+              + Add Income
+            </button>
+            <button className="btn primary" onClick={() => openModal("expense")}>
+              + Add Expense
             </button>
           </div>
         </div>
@@ -104,20 +99,9 @@ function App() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie
-                    data={chartData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={90}
-                    label
-                  >
+                  <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
                     {chartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -140,16 +124,10 @@ function App() {
                 <span className="tx-meta">{tx.date}</span>
               </div>
               <div className="tx-right">
-                <span
-                  className="tx-amount"
-                  style={{ color: tx.type === "income" ? "green" : "red" }}
-                >
+                <span className="tx-amount" style={{ color: tx.type === "income" ? "green" : "red" }}>
                   {tx.type === "income" ? "+" : "-"}₹{tx.amount}
                 </span>
-                <button
-                  className="icon-btn"
-                  onClick={() => deleteTransaction(tx.id, tx.amount, tx.type)}
-                >
+                <button className="icon-btn" onClick={() => deleteTransaction(tx.id)}>
                   ❌
                 </button>
               </div>
@@ -162,33 +140,14 @@ function App() {
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>Add Transaction</h3>
+            <h3>Add {form.type === "income" ? "Income" : "Expense"}</h3>
             <div className="form-group">
               <label>Title</label>
-              <input
-                type="text"
-                name="title"
-                value={form.title}
-                onChange={handleChange}
-                placeholder="Enter title"
-              />
+              <input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Enter title" />
             </div>
             <div className="form-group">
               <label>Amount</label>
-              <input
-                type="number"
-                name="amount"
-                value={form.amount}
-                onChange={handleChange}
-                placeholder="Enter amount"
-              />
-            </div>
-            <div className="form-group">
-              <label>Type</label>
-              <select name="type" value={form.type} onChange={handleChange}>
-                <option value="expense">Expense</option>
-                <option value="income">Income</option>
-              </select>
+              <input type="number" name="amount" value={form.amount} onChange={handleChange} placeholder="Enter amount" />
             </div>
             <div className="modal-actions">
               <button className="btn" onClick={closeModal}>
