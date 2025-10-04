@@ -16,16 +16,22 @@ function App() {
     return saved
       ? JSON.parse(saved)
       : [
-          { id: 1, title: "Food", amount: 150, type: "expense", date: "2025-10-01" },
-          { id: 2, title: "Travel", amount: 300, type: "expense", date: "2025-10-02" },
-          { id: 3, title: "Entertainment", amount: 200, type: "expense", date: "2025-10-03" },
-          { id: 4, title: "Salary", amount: 2000, type: "income", date: "2025-10-03" },
+          { id: 1, title: "Food", amount: 150, type: "expense", category: "food", date: "2025-10-01" },
+          { id: 2, title: "Travel", amount: 300, type: "expense", category: "travel", date: "2025-10-02" },
+          { id: 3, title: "Entertainment", amount: 200, type: "expense", category: "entertainment", date: "2025-10-03" },
+          { id: 4, title: "Salary", amount: 2000, type: "income", category: "salary", date: "2025-10-03" },
         ];
   });
 
   const [balance, setBalance] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", amount: "", type: "expense", category: "food" });
+  const [form, setForm] = useState({
+    title: "",
+    amount: "",
+    type: "expense",
+    category: "food",
+    date: new Date().toISOString().split("T")[0],
+  });
 
   // Persist transactions & update balance
   useEffect(() => {
@@ -38,7 +44,13 @@ function App() {
   }, [transactions]);
 
   const openModal = (type) => {
-    setForm({ title: "", amount: "", type, category: "food" });
+    setForm({
+      title: "",
+      amount: "",
+      type,
+      category: type === "income" ? "salary" : "food",
+      date: new Date().toISOString().split("T")[0],
+    });
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
@@ -56,7 +68,7 @@ function App() {
       amount: parseFloat(form.amount),
       type: form.type,
       category: form.category,
-      date: new Date().toISOString().split("T")[0],
+      date: form.date,
     };
     setTransactions([newTx, ...transactions]);
     closeModal();
@@ -165,6 +177,7 @@ function App() {
         <div className="modal-overlay">
           <div className="modal-content">
             <h3>Add {form.type === "income" ? "Income" : "Expense"}</h3>
+
             <div className="form-group">
               <label>Title</label>
               <input
@@ -175,16 +188,18 @@ function App() {
                 placeholder="Enter title"
               />
             </div>
+
             <div className="form-group">
               <label>Amount</label>
               <input
                 type="number"
-                name="price"
+                name="amount"
                 value={form.amount}
                 onChange={handleChange}
                 placeholder={form.type === "income" ? "Income Amount" : "Expense Amount"}
               />
             </div>
+
             <div className="form-group">
               <label>Category</label>
               <select name="category" value={form.category} onChange={handleChange}>
@@ -195,12 +210,23 @@ function App() {
                 <option value="other">Other</option>
               </select>
             </div>
+
+            <div className="form-group">
+              <label>Date</label>
+              <input
+                type="date"
+                name="date"
+                value={form.date}
+                onChange={handleChange}
+              />
+            </div>
+
             <div className="modal-actions">
               <button className="btn" onClick={closeModal}>
                 Cancel
               </button>
               <button type="submit" className="btn primary" onClick={addTransaction}>
-                Add
+                Add Balance
               </button>
             </div>
           </div>
