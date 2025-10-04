@@ -25,7 +25,7 @@ function App() {
 
   const [balance, setBalance] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [form, setForm] = useState({ title: "", amount: "", type: "expense" });
+  const [form, setForm] = useState({ title: "", amount: "", type: "expense", category: "food" });
 
   // Persist transactions & update balance
   useEffect(() => {
@@ -38,14 +38,14 @@ function App() {
   }, [transactions]);
 
   const openModal = (type) => {
-    setForm({ title: "", amount: "", type });
+    setForm({ title: "", amount: "", type, category: "food" });
     setIsModalOpen(true);
   };
   const closeModal = () => setIsModalOpen(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({ ...form, amount: value, [name]: value });
+    setForm({ ...form, [name]: value });
   };
 
   const addTransaction = () => {
@@ -55,6 +55,7 @@ function App() {
       title: form.title,
       amount: parseFloat(form.amount),
       type: form.type,
+      category: form.category,
       date: new Date().toISOString().split("T")[0],
     };
     setTransactions([newTx, ...transactions]);
@@ -84,7 +85,7 @@ function App() {
 
   return (
     <div className="container">
-      <h1>💰 Expense Tracker</h1>
+      <h1>Expense Tracker</h1>
 
       {/* Top Row */}
       <div className="top-row">
@@ -184,11 +185,21 @@ function App() {
                 placeholder={form.type === "income" ? "Income Amount" : "Expense Amount"}
               />
             </div>
+            <div className="form-group">
+              <label>Category</label>
+              <select name="category" value={form.category} onChange={handleChange}>
+                <option value="food">Food</option>
+                <option value="travel">Travel</option>
+                <option value="entertainment">Entertainment</option>
+                <option value="salary">Salary</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
             <div className="modal-actions">
               <button className="btn" onClick={closeModal}>
                 Cancel
               </button>
-              <button className="btn primary" onClick={addTransaction}>
+              <button type="submit" className="btn primary" onClick={addTransaction}>
                 Add
               </button>
             </div>
