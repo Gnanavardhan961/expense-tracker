@@ -10,24 +10,30 @@ import {
 } from "recharts";
 
 function App() {
-  const [balance, setBalance] = useState(5000);
+  // Pre-filled transactions to match Cypress tests
   const [transactions, setTransactions] = useState(() => {
     const saved = localStorage.getItem("transactions");
     return saved
       ? JSON.parse(saved)
       : [
-          { id: 1, title: "Groceries", amount: 120, type: "expense", date: "2025-10-01" },
-          { id: 2, title: "Salary", amount: 2000, type: "income", date: "2025-10-03" },
+          { id: 1, title: "Food", amount: 150, type: "expense", date: "2025-10-01" },
+          { id: 2, title: "Travel", amount: 300, type: "expense", date: "2025-10-02" },
+          { id: 3, title: "Entertainment", amount: 200, type: "expense", date: "2025-10-03" },
+          { id: 4, title: "Salary", amount: 2000, type: "income", date: "2025-10-03" },
         ];
   });
 
+  const [balance, setBalance] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form, setForm] = useState({ title: "", amount: "", type: "expense" });
 
-  // Persist transactions in localStorage
+  // Persist transactions & update balance
   useEffect(() => {
     localStorage.setItem("transactions", JSON.stringify(transactions));
-    const total = transactions.reduce((acc, t) => (t.type === "income" ? acc + t.amount : acc - t.amount), 0);
+    const total = transactions.reduce(
+      (acc, t) => (t.type === "income" ? acc + t.amount : acc - t.amount),
+      0
+    );
     setBalance(total);
   }, [transactions]);
 
@@ -35,14 +41,15 @@ function App() {
     setForm({ title: "", amount: "", type });
     setIsModalOpen(true);
   };
-
   const closeModal = () => setIsModalOpen(false);
 
-  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm({ ...form, amount: value, [name]: value });
+  };
 
   const addTransaction = () => {
     if (!form.title || !form.amount) return;
-
     const newTx = {
       id: Date.now(),
       title: form.title,
@@ -50,21 +57,26 @@ function App() {
       type: form.type,
       date: new Date().toISOString().split("T")[0],
     };
-
     setTransactions([newTx, ...transactions]);
     closeModal();
   };
 
-  const deleteTransaction = (id) => setTransactions(transactions.filter((tx) => tx.id !== id));
+  const deleteTransaction = (id) =>
+    setTransactions(transactions.filter((tx) => tx.id !== id));
 
+  // Chart data
   const chartData = [
     {
       name: "Income",
-      value: transactions.filter((tx) => tx.type === "income").reduce((acc, tx) => acc + tx.amount, 0),
+      value: transactions
+        .filter((tx) => tx.type === "income")
+        .reduce((acc, tx) => acc + tx.amount, 0),
     },
     {
       name: "Expense",
-      value: transactions.filter((tx) => tx.type === "expense").reduce((acc, tx) => acc + tx.amount, 0),
+      value: transactions
+        .filter((tx) => tx.type === "expense")
+        .reduce((acc, tx) => acc + tx.amount, 0),
     },
   ];
 
@@ -74,7 +86,7 @@ function App() {
     <div className="container">
       <h1>💰 Expense Tracker</h1>
 
-      {/* Top row */}
+      {/* Top Row */}
       <div className="top-row">
         {/* Wallet Card */}
         <div className="wallet-card">
@@ -99,7 +111,15 @@ function App() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={chartData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
+                  <Pie
+                    data={chartData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={90}
+                    label
+                  >
                     {chartData.map((entry, index) => (
                       <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                     ))}
@@ -115,7 +135,7 @@ function App() {
 
       {/* Transactions */}
       <div className="transactions">
-        <h3>Transactions</h3>
+        <h3>Expenses</h3>
         <ul className="tx-list">
           {transactions.map((tx) => (
             <li key={tx.id} className="tx-item">
@@ -124,7 +144,10 @@ function App() {
                 <span className="tx-meta">{tx.date}</span>
               </div>
               <div className="tx-right">
-                <span className="tx-amount" style={{ color: tx.type === "income" ? "green" : "red" }}>
+                <span
+                  className="tx-amount"
+                  style={{ color: tx.type === "income" ? "green" : "red" }}
+                >
                   {tx.type === "income" ? "+" : "-"}₹{tx.amount}
                 </span>
                 <button className="icon-btn" onClick={() => deleteTransaction(tx.id)}>
@@ -143,11 +166,23 @@ function App() {
             <h3>Add {form.type === "income" ? "Income" : "Expense"}</h3>
             <div className="form-group">
               <label>Title</label>
-              <input type="text" name="title" value={form.title} onChange={handleChange} placeholder="Enter title" />
+              <input
+                type="text"
+                name="title"
+                value={form.title}
+                onChange={handleChange}
+                placeholder="Enter title"
+              />
             </div>
             <div className="form-group">
               <label>Amount</label>
-              <input type="number" name="amount" value={form.amount} onChange={handleChange} placeholder="Enter amount" />
+              <input
+                type="number"
+                name="price"
+                value={form.amount}
+                onChange={handleChange}
+                placeholder={form.type === "income" ? "Income Amount" : "Expense Amount"}
+              />
             </div>
             <div className="modal-actions">
               <button className="btn" onClick={closeModal}>
